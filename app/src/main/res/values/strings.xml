@@ -1,10 +1,13 @@
 <resources>
-    <string name="app_name">truco</string>
+    <string name="app_name">PLACAR DE TRUCO</string>
+
     <string name="scoreboard">PLACAR DE TRUCO</string>
     <string name="history_game_button">Histórico do jogo</string>
     <string name="reset_game">Zerar jogo</string>
     <string name="add_button">Botão para acrescentar pontos</string>
     <string name="reduce_button">Botão para reduzir pontos</string>
     <string name="truco_add_3">TRUCO +3</string>
-
+    <string name="reset">Zerar placares</string>
+    <string name="history">Histórico</string>
+    <string name="title_activity_truco">title_activity_truco</string>
 </resources>

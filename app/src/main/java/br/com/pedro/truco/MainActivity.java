@@ -3,18 +3,33 @@ package br.com.pedro.truco;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class MainActivity extends AppCompatActivity {
     private Team time1;
     private Team time2;
+    List<GameHistory> gameHistoryList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,9 +38,66 @@ public class MainActivity extends AppCompatActivity {
 
         time1 = new Team(1, "Nós", 0);
         time2 = new Team(2, "Eles", 0);
-        configureScore(time1, time2);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            configureScore(time1, time2);
+        }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = new MenuInflater(this);
+        menuInflater.inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.reset_button) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.CustomAlertDialogTheme);
+
+            builder.setTitle("DESEJA ZERAR O PLACAR?");
+
+            builder.setNegativeButton("NÃO", (dialog, which) -> {
+                dialog.cancel();
+            });
+
+            builder.setPositiveButton("SIM", (dialog, which) -> {
+                resetScore(time1, time2);
+            });
+
+            AlertDialog alerta = builder.create();
+            alerta.setOnShowListener(dialog -> {
+                Button negativeButton = alerta.getButton(AlertDialog.BUTTON_NEGATIVE);
+                negativeButton.setTextColor(getResources().getColor(R.color.red));
+                negativeButton.setTypeface(null, Typeface.BOLD);
+
+                Button positiveButton = alerta.getButton(AlertDialog.BUTTON_POSITIVE);
+                positiveButton.setTextColor(getResources().getColor(R.color.green));
+                positiveButton.setTypeface(null, Typeface.BOLD);
+            });
+
+            alerta.setCanceledOnTouchOutside(false);
+            alerta.show();
+
+            return true;
+        } else if (item.getItemId() == R.id.showBottomSheet) {
+            try {
+                Log.d("MainActivity", "Tentando mostrar BottomSheetDialog");
+                BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(MainActivity.this);
+                View view1 = LayoutInflater.from(MainActivity.this).inflate(R.layout.bottom_sheet_layout, null);
+                bottomSheetDialog.setContentView(view1);
+                Log.d("MainActivity", "BottomSheetDialog configurado, tentando mostrar");
+                bottomSheetDialog.show();
+            }  catch (Exception e) {
+                Log.e("MainActivity", "Erro ao mostrar BottomSheetDialog: ", e);
+            }
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void configureScore(Team time1, Team time2) {
         ImageButton button_add_score1 = findViewById(R.id.first_button_add);
         ImageButton button_add_score2 = findViewById(R.id.second_button_add);
@@ -52,22 +124,31 @@ public class MainActivity extends AppCompatActivity {
         reduceScore(time1, reduceScore1, firstTeamScore);
         reduceScore(time2, reduceScore2, secondTeamScore);
 
-        buttonResetScore(time1, time2);
         resetScore(time1, time2);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void reduceScore(Team time, ImageButton addScoreButton, TextView scoreView) {
         addScoreButton.setOnClickListener(v -> {
             if (time.getScore() > 0) {
                 time.reduceScore();
+                GameHistory gameHistory = new GameHistory(time.getTeamName(), LocalDateTime.now(), "-", 1);
+                gameHistoryList.add(gameHistory);
+                Log.d("Reduce", "Lista" + gameHistory);
             }
             scoreView.setText(String.valueOf(time.getScore()));
         });
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void addScore(Team time, View addScoreButton, TextView scoreView, int quantity) {
         addScoreButton.setOnClickListener(v -> {
             time.addScore(quantity);
+
+            GameHistory gameHistory = new GameHistory(time.getTeamName(), LocalDateTime.now(), "+", quantity);
+            gameHistoryList.add(gameHistory);
+            Log.d("Add", "Lista" + gameHistory);
+
             if (time.getScore() >= 12) {
                 victoryAlert(time.getTeamName());
             }
@@ -78,8 +159,8 @@ public class MainActivity extends AppCompatActivity {
     private void victoryAlert(String teamName) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.CustomAlertDialogTheme);
 
-        builder.setTitle("Parabéns!");
-        builder.setMessage("O time '" + teamName + "' ganhou a partida.");
+        builder.setTitle("PARABÉNS!");
+        builder.setMessage("O TIME '" + teamName.toUpperCase() + "' GANHOU A PARTIDA.");
 
         builder.setPositiveButton("OK", (dialog, which) -> {
             resetScore(time1, time2);
@@ -97,37 +178,6 @@ public class MainActivity extends AppCompatActivity {
         alerta.show();
     }
 
-    private void buttonResetScore(Team time1, Team time2) {
-        ImageButton button_reset_score = findViewById(R.id.reset_game_button);
-        button_reset_score.setOnClickListener(v -> {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.CustomAlertDialogTheme);
-
-            builder.setTitle("Deseja zerar o placar?");
-
-            builder.setNegativeButton("NÃO", (dialog, which) -> {
-                dialog.cancel();
-            });
-
-            builder.setPositiveButton("SIM", (dialog, which) -> {
-                resetScore(time1, time2);
-            });
-
-            AlertDialog alerta = builder.create();
-            alerta.setOnShowListener(dialog -> {
-                Button negativeButton = alerta.getButton(AlertDialog.BUTTON_NEGATIVE);
-                negativeButton.setTextColor(getResources().getColor(R.color.red));
-                negativeButton.setTypeface(null, Typeface.BOLD);
-
-                Button positiveButton = alerta.getButton(AlertDialog.BUTTON_POSITIVE);
-                positiveButton.setTextColor(getResources().getColor(R.color.green));
-                positiveButton.setTypeface(null, Typeface.BOLD);
-            });
-
-            alerta.setCanceledOnTouchOutside(false);
-            alerta.show();
-        });
-    }
-
     private void resetScore(Team time1, Team time2) {
         TextView firstTeamScore = findViewById(R.id.first_team_score);
         TextView secondTeamScore = findViewById(R.id.second_team_score);
@@ -142,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
         final EditText input = new EditText(this);
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.CustomAlertDialogTheme);
 
-        builder.setTitle("Digite o novo nome do time:");
+        builder.setTitle("DIGITE O NOVO NOME DO TIME: ");
         builder.setView(input);
 
         builder.setNegativeButton("CANCELAR", new DialogInterface.OnClickListener() {
@@ -160,6 +210,8 @@ public class MainActivity extends AppCompatActivity {
                     userInput = "Nome";
                 } else if (userInput.contains(" ")) {
                     userInput = userInput.replaceAll(" ", "");
+                } else if (userInput.length() > 6) {
+                    userInput = "Nome";
                 }
                 TextView teamNameTextView = (winningTeam.getID() == 1) ? findViewById(R.id.first_team_name) : findViewById(R.id.second_team_name);
                 winningTeam.setTeamName(userInput);
@@ -180,8 +232,5 @@ public class MainActivity extends AppCompatActivity {
 
         alerta.setCanceledOnTouchOutside(false);
         alerta.show();
-
-
-
     }
 }

@@ -1,7 +1,7 @@
 package br.com.pedro.truco;
 
 public class Team {
-    private Integer ID;
+    private final Integer ID;
     private String teamName;
     private Integer score;
 
