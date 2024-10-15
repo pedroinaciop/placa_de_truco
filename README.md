@@ -8,8 +8,8 @@ Com base no layout criado no Figma, vamos desenvolver um aplicativo para adminis
 
 ## Autores
 
-João Gabriel Martiniano Braga 1346030
-Pedro Inácio Penha dos Santos 1574106
-Vitor Alves De Brito Silva  1368584
-Murillo Oliveira Sarmento 1680401
-Melissa Andrade Garcia da Silva 1731130
+João Gabriel Martiniano Braga 1346030    
+Pedro Inácio Penha dos Santos 1574106    
+Vitor Alves De Brito Silva  1368584    
+Murillo Oliveira Sarmento 1680401    
+Melissa Andrade Garcia da Silva 1731130    
