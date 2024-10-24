@@ -6,7 +6,6 @@ import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -15,20 +14,18 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
-
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-
-import com.google.android.material.bottomsheet.BottomSheetDialog;
-
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-
+@RequiresApi(api = Build.VERSION_CODES.O)
 public class MainActivity extends AppCompatActivity {
     private Team time1;
     private Team time2;
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
     List<GameHistory> gameHistoryList = new ArrayList<>();
 
     @Override
@@ -54,7 +51,6 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.reset_button) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.CustomAlertDialogTheme);
-
             builder.setTitle("DESEJA ZERAR O PLACAR?");
 
             builder.setNegativeButton("NÃO", (dialog, which) -> {
@@ -83,12 +79,13 @@ public class MainActivity extends AppCompatActivity {
         } else if (item.getItemId() == R.id.showBottomSheet) {
             try {
                 Log.d("MainActivity", "Tentando mostrar BottomSheetDialog");
-                BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(MainActivity.this);
-                View view1 = LayoutInflater.from(MainActivity.this).inflate(R.layout.bottom_sheet_layout, null);
-                bottomSheetDialog.setContentView(view1);
+
+                HistoryBottomSheet bottomSheet = new HistoryBottomSheet(gameHistoryList);
+                bottomSheet.show(getSupportFragmentManager(), "HistoryBottomSheet");
+
                 Log.d("MainActivity", "BottomSheetDialog configurado, tentando mostrar");
-                bottomSheetDialog.show();
-            }  catch (Exception e) {
+
+            } catch (Exception e) {
                 Log.e("MainActivity", "Erro ao mostrar BottomSheetDialog: ", e);
             }
             return true;
@@ -96,8 +93,6 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
     private void configureScore(Team time1, Team time2) {
         ImageButton button_add_score1 = findViewById(R.id.first_button_add);
         ImageButton button_add_score2 = findViewById(R.id.second_button_add);
@@ -127,12 +122,15 @@ public class MainActivity extends AppCompatActivity {
         resetScore(time1, time2);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     private void reduceScore(Team time, ImageButton addScoreButton, TextView scoreView) {
         addScoreButton.setOnClickListener(v -> {
             if (time.getScore() > 0) {
                 time.reduceScore();
-                GameHistory gameHistory = new GameHistory(time.getTeamName(), LocalDateTime.now(), "-", 1);
+
+                LocalDateTime now = LocalDateTime.now();
+                String formattedDateTime = now.format(formatter);
+
+                GameHistory gameHistory = new GameHistory(time.getTeamName(), formattedDateTime, "-", 1);
                 gameHistoryList.add(gameHistory);
                 Log.d("Reduce", "Lista" + gameHistory);
             }
@@ -140,12 +138,14 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     private void addScore(Team time, View addScoreButton, TextView scoreView, int quantity) {
         addScoreButton.setOnClickListener(v -> {
             time.addScore(quantity);
 
-            GameHistory gameHistory = new GameHistory(time.getTeamName(), LocalDateTime.now(), "+", quantity);
+            LocalDateTime now = LocalDateTime.now();
+            String formattedDateTime = now.format(formatter);
+
+            GameHistory gameHistory = new GameHistory(time.getTeamName(), formattedDateTime, "+", quantity);
             gameHistoryList.add(gameHistory);
             Log.d("Add", "Lista" + gameHistory);
 
@@ -186,6 +186,7 @@ public class MainActivity extends AppCompatActivity {
 
         time1.resetScore(0);
         time2.resetScore(0);
+        gameHistoryList.clear();
     }
 
     private void showAlertWithInput(Team winningTeam) {

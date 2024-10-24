@@ -31,7 +31,6 @@ public class Team {
         this.score = 0;
     }
 
-
     public void addScore(Integer quantity) {
         this.score += quantity;
     }
@@ -39,5 +38,4 @@ public class Team {
     public void reduceScore() {
         this.score -= 1;
     }
-
 }
