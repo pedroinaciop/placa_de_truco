@@ -1,4 +1,4 @@
-# Placa de truco (Projeto em desenvolvimento)
+# Placar de truco (Projeto em desenvolvimento)
 
 ## Sobre o projeto
 
