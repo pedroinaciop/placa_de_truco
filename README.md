@@ -6,10 +6,6 @@ Com base no layout criado no Figma abaixo, vamos desenvolver um aplicativo para 
 
 ![Layout_inicial](https://raw.githubusercontent.com/pedroinaciop/placa_de_truco/refs/heads/master/app/src/main/res/drawable/layout_placar.png)
 
-## Autores
+## Autor
 
-João Gabriel Martiniano Braga 1346030    
-Pedro Inácio Penha dos Santos 1574106    
-Vitor Alves De Brito Silva  1368584    
-Murillo Oliveira Sarmento 1680401    
-Melissa Andrade Garcia da Silva 1731130    
+Pedro Inácio Penha dos Santos - https://www.linkedin.com/in/pedroinaciop/
